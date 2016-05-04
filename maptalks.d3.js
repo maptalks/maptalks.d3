@@ -264,17 +264,16 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     },
 
     _render: function() {
-        if (!this._context) {
-            this._prepareCanvas();
-            this._armContext();
-        }
+        this._prepareCanvas();
         if (!this._predrawed) {
+            this._armContext();
             this._drawContext = this._layer.preDraw(this._context, this._layer.getGeoProjection());
             if (!this._drawContext) {
                 this._drawContext = [];
             }
             this._predrawed = true;
         }
+
         this._layer.draw.apply(this._layer, this._drawContext.concat([this._context, this._layer.getGeoProjection()]));
         this._requestMapToRender();
         this._fireLoadedEvent();
@@ -306,8 +305,8 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     }
 });
 
-maptalks.D3Layer.registerRenderer('dom', maptalks.renderer.d3layer.Dom);
-maptalks.D3Layer.registerRenderer('canvas', maptalks.renderer.d3layer.Canvas);
+maptalks.D3Layer.registerRenderer('dom', maptalks.renderer.d3layer.Dom)
+                .registerRenderer('canvas', maptalks.renderer.d3layer.Canvas);
 
 
 
