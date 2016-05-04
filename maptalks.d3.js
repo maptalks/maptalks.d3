@@ -264,7 +264,7 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     },
 
     _render: function() {
-        if (!this._d3Context) {
+        if (!this._context) {
             this._prepareCanvas();
             this._armContext();
         }
