@@ -71,12 +71,12 @@ maptalks.D3Layer =  maptalks.Layer.extend(/** @lends maptalks.D3Layer.prototype 
     },
 
     /**
-     * request layer to refresh
+     * request layer to redraw
      */
-    refresh: function() {
+    redraw: function() {
         //request layer to refresh
         if (this.isCanvasRender()) {
-            this._getRenderer()._requestMapToRender();
+            this._getRenderer().requestMapToRender();
         }
         return this;
     },
@@ -240,13 +240,12 @@ maptalks.renderer.d3layer.Dom = maptalks.Class.extend(/** @lends maptalks.render
 maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     initialize : function(layer) {
         this._layer = layer;
-        this._registerEvents();
     },
 
     remove:function() {
         delete this._drawContext;
         this._removeEvents();
-        this._requestMapToRender();
+        this.requestMapToRender();
     },
 
     _getGeoProjection: function() {
@@ -264,7 +263,7 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     },
 
     draw: function() {
-        this._prepareCanvas();
+        this.prepareCanvas();
         if (!this._predrawed) {
             this._armContext();
             this._drawContext = this._layer.preDraw(this._context, this._layer.getGeoProjection());
@@ -275,8 +274,8 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
         }
 
         this._layer.draw.apply(this._layer, this._drawContext.concat([this._context, this._layer.getGeoProjection()]));
-        this._requestMapToRender();
-        this._fireLoadedEvent();
+        this.requestMapToRender();
+        this.fireLoadedEvent();
     },
 
     _armContext: function() {
@@ -305,8 +304,8 @@ maptalks.renderer.d3layer.Canvas = maptalks.renderer.Canvas.extend({
     }
 });
 
-maptalks.D3Layer.registerRenderer('dom', maptalks.renderer.d3layer.Dom)
-                .registerRenderer('canvas', maptalks.renderer.d3layer.Canvas);
+maptalks.D3Layer.registerRenderer('dom', maptalks.renderer.d3layer.Dom);
+maptalks.D3Layer.registerRenderer('canvas', maptalks.renderer.d3layer.Canvas);
 
 
 
