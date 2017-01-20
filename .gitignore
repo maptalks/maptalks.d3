@@ -1,7 +1,24 @@
+.tmp/
+*.gz
+.idea/
+*.iml
+.tern-port
+doc/
+
+### *tags
+GPATH
+GRTAGS
+GTAGS
+TAGS
+
+### OSX template
+.DS_Store
+
+# Created by .ignore support plugin (hsz.mobi)
+### Node template
 # Logs
 logs
 *.log
-npm-debug.log*
 
 # Runtime data
 pids
@@ -24,10 +41,8 @@ coverage
 build/Release
 
 # Dependency directory
+# https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
 node_modules
 
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
+#example deploy config
+examples/replace.json
