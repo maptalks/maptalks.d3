@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Choropleth Map by D3Layer</title>
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="../dist/maptalks.d3.min.js"></script>
+</head>
+<body>
+<div style="width:960px;height:600px;" id="map"></div>
+<script>
+// Reference:
+// http://bl.ocks.org/mbostock/4060606
+//
+
+var map = new maptalks.Map("map",{
+  center: [-96.9, 37.8],
+  zoom:   4,
+  doubleClickZoom:false,
+  minZoom:1,
+  maxZoom:18,
+  attributionControl : {
+      'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  },
+  baseLayer : new maptalks.TileLayer("base",{
+      'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+      'subdomains'  : ['a','b','c','d','e']
+  })
+});
+
+//create a
+var d3Layer = new maptalks.D3Layer('d3', {'renderer' : 'canvas'});
+
+//Prepare the context parameters for D3Layer's drawing.
+//Method prepareToDraw will be called only for once before the first drawing of the layer.
+//It can be used to prepare context parameters for draw method
+//The parameters returned by prepareToDraw will be passed to draw method.
+d3Layer.prepareToDraw = function(context, projection) {
+    var colors = [
+        'rgba(247,251,255, 0.8)',
+        'rgba(222,235,247, 0.8)',
+        'rgba(198,219,239, 0.8)',
+        'rgba(158,202,225, 0.8)',
+        'rgba(107,174,214, 0.8)',
+        'rgba(66,146,198, 0.8)',
+        'rgba(33,113,181, 0.8)',
+        'rgba(8,81,156, 0.8)',
+        'rgba(8,48,107, 0.8)'
+  ];
+  var quantize = d3.scale.quantize()
+      .domain([0, .15])
+      .range(d3.range(9).map(function(i) { return i; }));
+  var rateById = d3.map();
+
+  //The parameters will be passed to draw method.
+  return [rateById, colors, quantize];
+};
+
+var us;
+
+//context is the canvas context
+//projection is the projection object used by d3 to convert geo coordinates to screen points.
+d3Layer.draw = function draw(context, projection, rateById, colors, quantize) {
+  var layer = this;
+  //the d3 path method to draw features on canvas context
+  var path = d3.geo.path()
+      .projection(projection).context(context);
+  if (!us) {
+    //load data
+    queue()
+      .defer(d3.json, "us.json")
+      .defer(d3.tsv, "unemployment.tsv", function(d) { rateById.set(d.id, +d.rate); })
+      .await(function (error, data) {
+        if (error) throw error;
+        us = data;
+        draw();
+      });
+  } else {
+    //data is ready and just draw
+    draw();
+  }
+
+  function draw() {
+    topojson.feature(us, us.objects.counties).features.forEach(function (d) {
+      context.fillStyle = colors[quantize(rateById.get(d.id))];
+      context.beginPath();
+      path(d);
+      context.fill();
+    });
+    //ask the layer to redraw
+    layer.redraw();
+  }
+};
+
+map.addLayer(d3Layer);
+</script>
+</body>
+</html>

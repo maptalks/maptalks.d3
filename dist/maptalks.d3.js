@@ -184,6 +184,15 @@ D3Layer.registerRenderer('dom', function () {
         };
     };
 
+    _class.prototype.remove = function remove() {
+        delete this.context;
+        maptalks.DomUtil.removeDomNode(this._layerContainer);
+        delete this._layerContainer;
+        delete this._viewBox;
+        delete this._d3zoom;
+        delete this.layer;
+    };
+
     _class.prototype._canTransform = function _canTransform() {
         return maptalks.Browser.any3d || maptalks.Browser.ie9;
     };

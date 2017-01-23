@@ -17,6 +17,7 @@ describe('D3Layer', function () {
     });
 
     it('should display when added to map', function (done) {
+        new maptalks.D3Layer('d').addTo(map);
         done();
     });
 
