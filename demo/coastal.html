@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<style>
+html,body{
+    margin:0px;
+    height:100%;
+    width: 100%;
+ }
+
+.counties {
+  fill: #ccc;
+}
+
+.county-borders {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: .5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+</style>
+<body  onload="mapInit()">
+<div style="width:100%;height:100%;float:right;margin-top:0px;" id="map"></div>
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="../dist/maptalks.d3.js"></script>
+<script>
+
+var map;
+// Original example of D3:
+// http://bl.ocks.org/mbostock/9744818
+
+
+function mapInit() {
+
+    map = new maptalks.Map("map",{
+        center: [-96.9, 37.8],
+        zoom:   4,
+        zoomControl:true,
+        pitch : 30,
+        attributionControl : {
+          'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        },
+        baseLayer : new maptalks.TileLayer("base",{
+          'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+          'subdomains'  : ['a','b','c','d','e']
+        })
+    });
+    var d3Layer = new maptalks.D3Layer('d3', {'d3Version' : 3, 'renderer' : 'dom', 'hideWhenZooming' : false});
+    d3Layer.draw = draw;
+    map.addLayer(d3Layer);
+}
+
+function draw(context, projection) {
+    var svg = d3.select(context);
+
+    var path = d3.geo.path()
+    .projection(projection);
+
+    var color = d3.scale.ordinal()
+        .domain(d3.range(9).reverse())
+        .range(["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]);
+
+
+    queue()
+        .defer(d3.json, "us.json")
+        .defer(d3.tsv, "coastal-counties.tsv")
+        .await(ready);
+
+    function ready(error, us, coastals) {
+      if (error) throw error;
+
+      var counties = topojson.feature(us, us.objects.counties),
+          neighbors = topojson.neighbors(us.objects.counties.geometries),
+          coastals = d3.set(coastals.map(function(d) { return d.id; })),
+          nexts = [],
+          nexts2 = [],
+          distance = 0;
+
+      counties.features.forEach(function(county, i) {
+        if (coastals.has(county.id)) nexts.push(county);
+        county.distance = Infinity;
+        county.neighbors = neighbors[i].map(function(j) { return counties.features[j]; });
+      });
+
+      while (nexts.length) {
+        nexts.forEach(function(county) {
+          if (county.distance > distance) {
+            county.distance = distance;
+            county.neighbors.forEach(function(neighbor) { nexts2.push(neighbor); });
+          }
+        });
+        nexts = nexts2, nexts2 = [], ++distance;
+      }
+
+      svg.append("g")
+          .attr("class", "counties")
+        .selectAll("path")
+          .data(counties.features)
+        .enter().append("path")
+          .style("fill", function(d) { return color(Math.min(9, d.distance)); })
+          .attr("d", path);
+
+      svg.append("path")
+          .attr("class", "county-borders")
+          .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; }))
+          .attr("d", path);
+    }
+
+}
+</script>

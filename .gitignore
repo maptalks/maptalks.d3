@@ -1,4 +1,4 @@
-/**/*
-!dist/*.js
-!dist/*.css
-!ACKNOWLEDGEMENT
+node_modules/
+*.log
+yarn.lock
+*.gz

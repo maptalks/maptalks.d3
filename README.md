@@ -3,9 +3,9 @@
 [![CircleCI](https://circleci.com/gh/maptalks/maptalks.d3.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.d3)
 [![NPM Version](https://img.shields.io/npm/v/maptalks.d3.svg)](https://github.com/maptalks/maptalks.d3)
 
-A maptalks Layer to render with great d3js library.
+A maptalks Layer to render with great [d3js](https://d3js.org) library.
 
-![screenshot]()
+![screenshot](https://cloud.githubusercontent.com/assets/13678919/25334926/58b6d23e-2923-11e7-9920-86657ccb4aac.jpg)
 
 ## Install
   
@@ -20,17 +20,28 @@ As a plugin, ```maptalks.d3``` must be loaded after ```maptalks.js``` in browser
 <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/maptalks.d3/dist/maptalks.d3.min.js"></script>
 <script>
-var d3Layer = new maptalks.D3Layer('d3').addTo(map);
+var d3Layer = new maptalks.D3Layer('d3');
+d3Layer.prepareToDraw = function (ctx, projection) {
+    //preparation
+};
+
+d3Layer.draw = function (ctx, projection) {
+    //drawing the layer
+};
+
+map.addLayer(d3Layer);
 </script>
 ```
-
 ## Supported Browsers
 
 IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## Examples
 
-* [Locations of this week's earthquakes](https://maptalks.github.io/maptalks.d3/demo/).
+* [Choropleth of unemployment](https://maptalks.github.io/maptalks.d3/demo/choropleth.html). (based on [original](http://bl.ocks.org/mbostock/4060606))
+* [Choropleth of unemployment] with D3 V3(https://maptalks.github.io/maptalks.d3/demo/choropleth-v3.html). (based on [original](http://bl.ocks.org/mbostock/4060606))
+* [Voronoi diagram of airports and flights](https://maptalks.github.io/maptalks.d3/demo/flights.html). (based on [original](http://bl.ocks.org/mbostock/7608400))
+* [Coastal Graph Distance](https://maptalks.github.io/maptalks.d3/demo/coastal.html). (based on [original](http://bl.ocks.org/mbostock/9744818))
 
 ## API Reference
 
@@ -44,6 +55,7 @@ new maptalks.D3Layer(id, options)
 
 * id **String** layer id
 * options **Object** options
+    * d3Version **Number** version of D3: 3 or 4 (4 by default)
     * renderer **String** renderer of the layer: 'dom' or 'canvas' ('canvas' by default)
     * hideWhenZooming **Boolean** for dom renderer, whether hide the layer when zooming to improve performance (false by default)
     * container **String** for dom renderer, specify the container for layer dom elements: 'front' or 'back' ('front' by default)
@@ -76,6 +88,7 @@ The parameters returned by prepareToDraw will be passed to draw method.
 * projection **Object** map projection object containing ```project(coord)``` and ```unproject(coord)``` method, returned by map.getProjection()
 
 ```javascript
+var d3Layer = new maptalks.D3Layer('d3', { d3Version : 3 });
 //Prepare the context parameters for D3Layer's drawing.
 //Method prepareToDraw will be called only for once before the first drawing of the layer.
 //It can be used to prepare context parameters for draw method
@@ -113,6 +126,7 @@ The core interface method of D3Layer, implement it to draw the layer on the map.
 * params **Any** parameters returns by `prepareToDraw` method
 
 ```javascript
+var d3Layer = new maptalks.D3Layer('d3', { d3Version : 3 });
 //context is the canvas context
 //projection is the projection object used by d3 to convert geo coordinates to screen points.
 d3Layer.draw = function draw(context, projection, rateById, colors, quantize) {
