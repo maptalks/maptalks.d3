@@ -4,10 +4,10 @@
  * (c) 2016-2017 maptalks.org
  */
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('maptalks')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'maptalks'], factory) :
-	(factory((global.maptalks = global.maptalks || {}),global.maptalks));
-}(this, (function (exports,maptalks) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('maptalks'), require('d3')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'maptalks', 'd3'], factory) :
+	(factory((global.maptalks = global.maptalks || {}),global.maptalks,global.d3));
+}(this, (function (exports,maptalks,d3) { 'use strict';
 
 function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
 
@@ -303,7 +303,7 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
 
     _class2.prototype.remove = function remove() {
         delete this._drawContext;
-        maptalks.renderer.Canvas.prototype.remove.call(this);
+        _maptalks$renderer$Ca.prototype.remove.call(this);
     };
 
     _class2.prototype.getGeoProjection = function getGeoProjection() {
@@ -326,6 +326,7 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
                 point: proj
             });
         }
+        return null;
     };
 
     _class2.prototype.draw = function draw() {
