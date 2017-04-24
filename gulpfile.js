@@ -7,7 +7,10 @@ const testHelper = new TestHelper();
 const karmaConfig = require('./karma.config');
 
 gulp.task('build', () => {
-    return bundleHelper.bundle('index.js');
+    const rollupConfig = bundleHelper.getDefaultRollupConfig();
+    rollupConfig['sourceMap'] = false;
+    rollupConfig['external'].push('d3');
+    return bundleHelper.bundle('index.js', rollupConfig);
 });
 
 gulp.task('minify', ['build'], () => {

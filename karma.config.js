@@ -5,6 +5,7 @@ module.exports = {
     frameworks: ['mocha', 'expect', 'expect-maptalks', 'happen'],
     files: [
         'node_modules/maptalks/dist/maptalks.js',
+        'node_modules/d3/build/d3.js',
         'dist/' + pkg.name + '.js',
         'test/**/*.js'
     ],

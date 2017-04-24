@@ -1,5 +1,5 @@
 import * as maptalks from 'maptalks';
-
+import * as d3 from 'd3';
 
 const TRANSFORM = maptalks.DomUtil['TRANSFORM'];
 
@@ -167,15 +167,15 @@ D3Layer.registerRenderer('dom', class {
         const me = this;
         const d3v = this.layer.options['d3Version'];
         const proj = function (x, y) {
-                if (x[0] && x[1]) {
-                    x = [x[0], x[1]];
-                }
-                const point = map.coordinateToPoint(new maptalks.Coordinate(x, y), me._d3zoom);
-                if (this && this.stream) {
-                    this.stream.point(point.x, point.y);
-                }
-                return [point.x, point.y];
-            };        
+            if (x[0] && x[1]) {
+                x = [x[0], x[1]];
+            }
+            const point = map.coordinateToPoint(new maptalks.Coordinate(x, y), me._d3zoom);
+            if (this && this.stream) {
+                this.stream.point(point.x, point.y);
+            }
+            return [point.x, point.y];
+        };
         if (d3v === 3) {
             return proj;
         } else if (d3v === 4) {
@@ -184,7 +184,7 @@ D3Layer.registerRenderer('dom', class {
             });
         }
         return null;
-        
+
     }
 
     remove() {
@@ -269,7 +269,7 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
 
     remove() {
         delete this._drawContext;
-        maptalks.renderer.Canvas.prototype.remove.call(this);
+        super.remove();
     }
 
     getGeoProjection() {
@@ -292,6 +292,7 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
                 point: proj
             });
         }
+        return null;
     }
 
     draw() {
