@@ -39,7 +39,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 ## Examples
 
 * [Choropleth of unemployment](https://maptalks.github.io/maptalks.d3/demo/choropleth.html). (based on [original](http://bl.ocks.org/mbostock/4060606))
-* [Choropleth of unemployment] with D3 V3(https://maptalks.github.io/maptalks.d3/demo/choropleth-v3.html). (based on [original](http://bl.ocks.org/mbostock/4060606))
+* [Choropleth of unemployment with D3 V3](https://maptalks.github.io/maptalks.d3/demo/choropleth-v3.html). (based on [original](http://bl.ocks.org/mbostock/4060606))
 * [Voronoi diagram of airports and flights](https://maptalks.github.io/maptalks.d3/demo/flights.html). (based on [original](http://bl.ocks.org/mbostock/7608400))
 * [Coastal Graph Distance](https://maptalks.github.io/maptalks.d3/demo/coastal.html). (based on [original](http://bl.ocks.org/mbostock/9744818))
 
