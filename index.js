@@ -14,7 +14,7 @@ function createContainer() {
 
 const options = {
     'container' : 'front',
-    'renderer' : 'dom', //'dom/canvas'
+    'renderer' : 'canvas', //'dom/canvas'
     'hideWhenZooming' : false
 };
 
@@ -74,10 +74,6 @@ export class D3Layer extends maptalks.Layer {
         return this._getRenderer().context;
     }
 
-    getSize() {
-        return this.getMap().getSize();
-    }
-
     getGeoProjection() {
         return this._getRenderer().getGeoProjection();
     }
@@ -97,8 +93,19 @@ D3Layer.registerRenderer('dom', class {
     }
 
     render() {
+        if (!this._predrawn) {
+            this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
+            if (!this._drawContext) {
+                this._drawContext = [];
+            }
+            if (!Array.isArray(this._drawContext)) {
+                this._drawContext = [this._drawContext];
+            }
+            this._predrawn = true;
+        }
         if (!this._drawed) {
-            this.layer.draw(this.layer.getContext(), this.layer.getGeoProjection());
+            const args = [this.layer.getContext(), this.layer.getGeoProjection()].concat(this._drawContext);
+            this.layer.draw.apply(this.layer, args);
             this._drawed = true;
         }
         this.layer.fire('layerload');
@@ -240,7 +247,7 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
 
     draw() {
         this.prepareCanvas();
-        if (!this._predrawed) {
+        if (!this._predrawn) {
             this._armContext();
             this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
             if (!this._drawContext) {
@@ -249,7 +256,7 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
             if (!Array.isArray(this._drawContext)) {
                 this._drawContext = [this._drawContext];
             }
-            this._predrawed = true;
+            this._predrawn = true;
         }
 
         this.layer.draw.apply(this.layer, [this.context, this.layer.getGeoProjection()].concat(this._drawContext));
