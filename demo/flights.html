@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<style>
+html,body{
+    margin:0px;
+    height:100%;
+    width: 100%;
+ }
+.states {
+  fill: #ccc;
+}
+
+.state-borders {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.airport-arcs {
+  display: none;
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+}
+
+.airport-cell {
+  fill: none;
+  pointer-events: all;
+}
+
+.airports circle {
+  fill: steelblue;
+  stroke: #fff;
+  pointer-events: none;
+}
+
+.airport:hover .airport-arcs {
+  display: inline;
+}
+
+.airport-cell {
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+</style>
+<body  onload="mapInit()">
+<div style="width:100%;height:100%;float:right;margin-top:0px;" id="map"></div>
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="../dist/maptalks.d3.js"></script>
+<script>
+
+var map;
+// Original example of D3:
+// http://bl.ocks.org/mbostock/7608400
+//
+function mapInit() {
+
+    map = new maptalks.Map("map",{
+        center: [-96.9, 37.8],
+        zoom:  4,
+        zoomControl:true,
+        minZoom:1,
+        maxZoom:18,
+        attribution : {
+          'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        },
+        baseLayer : new maptalks.TileLayer("base",{
+          'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+          'subdomains'  : ['a','b','c','d','e']
+        })
+    });
+    var d3Layer = new maptalks.D3Layer('d3', {'renderer' : 'dom',  'hideWhenZooming' : false, 'd3Version' : 3});
+    d3Layer.draw = draw;
+    map.addLayer(d3Layer);
+}
+
+function draw(context, projection) {
+
+  var path = d3.geo.path()
+      .projection(projection);
+
+  var voronoi = d3.geom.voronoi()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; });
+
+  var svg = d3.select(context);
+
+  queue()
+      .defer(d3.json, "us.json")
+      .defer(d3.csv, "airports.csv")
+      .defer(d3.csv, "flights.csv")
+      .await(ready);
+
+  function ready(error, us, airports, flights) {
+    if (error) throw error;
+
+    var airportById = d3.map(),
+        positions = [];
+
+    airports.forEach(function(d) {
+      airportById.set(d.iata, d);
+      d.outgoing = [];
+      d.incoming = [];
+    });
+
+    flights.forEach(function(flight) {
+      var source = airportById.get(flight.origin),
+          target = airportById.get(flight.destination),
+          link = {source: source, target: target};
+      source.outgoing.push(link);
+      target.incoming.push(link);
+    });
+
+    airports = airports.filter(function(d) {
+      if (d.count = Math.max(d.incoming.length, d.outgoing.length)) {
+        d[0] = +d.longitude;
+        d[1] = +d.latitude;
+        var position = projection(d);
+        d.x = position[0];
+        d.y = position[1];
+        return true;
+      }
+    });
+
+    voronoi(airports)
+        .forEach(function(d) { d.point.cell = d; });
+
+    svg.append("path")
+        .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+        .attr("class", "state-borders")
+        .attr("d", path);
+
+    var airport = svg.append("g")
+        .attr("class", "airports")
+      .selectAll("g")
+        .data(airports.sort(function(a, b) { return b.count - a.count; }))
+      .enter().append("g")
+        .attr("class", "airport");
+
+    airport.append("path")
+        .attr("class", "airport-cell")
+        .attr("d", function(d) { return d.cell.length ? "M" + d.cell.join("L") + "Z" : null; });
+
+    airport.append("g")
+        .attr("class", "airport-arcs")
+      .selectAll("path")
+        .data(function(d) { return d.outgoing; })
+      .enter().append("path")
+        .attr("d", function(d) { return path({type: "LineString", coordinates: [d.source, d.target]}); });
+
+    airport.append("circle")
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .attr("r", function(d, i) { return Math.sqrt(d.count); });
+
+  }
+}
+</script>

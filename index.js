@@ -1,4 +1,7 @@
 import * as maptalks from 'maptalks';
+import * as d3 from 'd3';
+
+const TRANSFORM = maptalks.DomUtil['TRANSFORM'];
 
 function createContainer() {
     const ns = 'http://www.w3.org/2000/svg';
@@ -13,8 +16,9 @@ function createContainer() {
 }
 
 const options = {
-    'container' : 'front',
-    'renderer' : 'dom', //'dom/canvas'
+    'd3Version'   : 4, // 3, 4
+    'container' : 'front', // front, back
+    'renderer' : 'canvas', //'dom/canvas'
     'hideWhenZooming' : false
 };
 
@@ -74,10 +78,6 @@ export class D3Layer extends maptalks.Layer {
         return this._getRenderer().context;
     }
 
-    getSize() {
-        return this.getMap().getSize();
-    }
-
     getGeoProjection() {
         return this._getRenderer().getGeoProjection();
     }
@@ -97,8 +97,19 @@ D3Layer.registerRenderer('dom', class {
     }
 
     render() {
+        if (!this._predrawn) {
+            this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
+            if (!this._drawContext) {
+                this._drawContext = [];
+            }
+            if (!Array.isArray(this._drawContext)) {
+                this._drawContext = [this._drawContext];
+            }
+            this._predrawn = true;
+        }
         if (!this._drawed) {
-            this.layer.draw(this.layer.getContext(), this.layer.getGeoProjection());
+            const args = [this.layer.getContext(), this.layer.getGeoProjection()].concat(this._drawContext);
+            this.layer.draw.apply(this.layer, args);
             this._drawed = true;
         }
         this.layer.fire('layerload');
@@ -114,27 +125,38 @@ D3Layer.registerRenderer('dom', class {
         return {
             'zoomend' : this.onZoomEnd,
             'zoomstart' : this.onZoomStart,
+            'moving' : this.onMoving,
             'moveend' : this._refreshViewBox,
             'resize'  : this._refreshViewBox,
-            'zooming' : this.onZooming
+            'zooming' : this.onZooming,
+            'pitch' : this._refreshViewBox,
+            'rotate' : this._refreshViewBox
         };
+    }
+
+    onMoving() {
+        if (this.getMap().getPitch()) {
+            this._refreshViewBox();
+        }
     }
 
     onZoomEnd() {
         this._resetContainer();
-        if (this.layer.options['hideWhenZooming'] || !this._canTransform()) {
+        if (this.layer.options['hideWhenZooming'] || !this._canTransform() || this.getMap().domCssMatrix) {
             this._layerContainer.style.display = '';
         }
     }
 
     onZoomStart() {
-        if (this.layer.options['hideWhenZooming'] || !this._canTransform()) {
+        if (this.layer.options['hideWhenZooming'] || !this._canTransform() || this.getMap().domCssMatrix) {
             this._layerContainer.style.display = 'none';
         }
     }
 
     onZooming(param) {
-        maptalks.DomUtil.setTransformMatrix(this._layerContainer, param.matrix['container']);
+        if (this._layerContainer.style.display !== 'none') {
+            maptalks.DomUtil.setTransformMatrix(this._layerContainer, param.matrix['container']);
+        }
     }
 
     getGeoProjection() {
@@ -143,7 +165,8 @@ D3Layer.registerRenderer('dom', class {
             this._d3zoom = map.getZoom();
         }
         const me = this;
-        return function (x, y) {
+        const d3v = this.layer.options['d3Version'];
+        const proj = function (x, y) {
             if (x[0] && x[1]) {
                 x = [x[0], x[1]];
             }
@@ -153,6 +176,15 @@ D3Layer.registerRenderer('dom', class {
             }
             return [point.x, point.y];
         };
+        if (d3v === 3) {
+            return proj;
+        } else if (d3v === 4) {
+            return d3.geoTransform({
+                point: proj
+            });
+        }
+        return null;
+
     }
 
     remove() {
@@ -207,11 +239,27 @@ D3Layer.registerRenderer('dom', class {
 
         this.context.setAttribute('viewBox', this._viewBox.join(' '));
 
-        this._layerContainer.style.transform = '';
+        const container = this._layerContainer;
+        container.style.transform = '';
 
+        if (map.domCssMatrix) {
+            const size = map.getSize();
+            if (parseInt(container.style.width) !== size['width'] || parseInt(container.style.height) !== size['height']) {
+                container.style.width = size['width'] + 'px';
+                container.style.height = size['height'] + 'px';
+            }
+            const matrix = maptalks.Util.join(map.domCssMatrix);
+            container.style[TRANSFORM] = 'matrix3D(' + matrix + ')';
+        } else {
+            maptalks.DomUtil.removeTransform(container);
+            if (container.style.width || container.style.height) {
+                container.style.width = null;
+                container.style.height = null;
+            }
+        }
         const offset = map.offsetPlatform();
-        this._layerContainer.style.left = -offset.x + 'px';
-        this._layerContainer.style.top = -offset.y + 'px';
+        container.style.left = -offset.x + 'px';
+        container.style.top = -offset.y + 'px';
     }
 
 
@@ -221,12 +269,12 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
 
     remove() {
         delete this._drawContext;
-        maptalks.renderer.Canvas.prototype.remove.call(this);
+        super.remove();
     }
 
     getGeoProjection() {
         const map = this.getMap();
-        return function (x, y) {
+        const proj = function (x, y) {
             if (x[0] && x[1]) {
                 x = [x[0], x[1]];
             }
@@ -236,11 +284,20 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
             }
             return [point.x, point.y];
         };
+        const d3v = this.layer.options['d3Version'];
+        if (d3v === 3) {
+            return proj;
+        } else if (d3v === 4) {
+            return d3.geoTransform({
+                point: proj
+            });
+        }
+        return null;
     }
 
     draw() {
         this.prepareCanvas();
-        if (!this._predrawed) {
+        if (!this._predrawn) {
             this._armContext();
             this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
             if (!this._drawContext) {
@@ -249,7 +306,7 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
             if (!Array.isArray(this._drawContext)) {
                 this._drawContext = [this._drawContext];
             }
-            this._predrawed = true;
+            this._predrawn = true;
         }
 
         this.layer.draw.apply(this.layer, [this.context, this.layer.getGeoProjection()].concat(this._drawContext));
@@ -262,21 +319,21 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
         }
         const map = this.getMap();
         this.context.arcInMeter = function (x, y, radius, startAngle, endAngle, anticlockwise) {
-            var px = map.distanceToPixel(radius, 0);
+            const px = map.distanceToPixel(radius, 0);
             return this.arc(x, y, px['width'], startAngle, endAngle, anticlockwise);
         };
         this.context.arcToInMeter = function (x1, y1, x2, y2, radius) {
-            var px = map.distanceToPixel(radius, 0);
+            const px = map.distanceToPixel(radius, 0);
             return this.arcTo(x1, y1, x2, y2, px['width']);
         };
         if (this.context.ellipse) {
             this.context.ellispeInMeter = function (x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise) {
-                var px = map.distanceToPixel(radiusX, radiusY);
+                const px = map.distanceToPixel(radiusX, radiusY);
                 return this.ellipse(x, y, px['width'], px['height'], rotation, startAngle, endAngle, anticlockwise);
             };
         }
         this.context.rectInMeter = function (x, y, width, height) {
-            var px = map.distanceToPixel(width, height);
+            const px = map.distanceToPixel(width, height);
             return this.rect(x, y, px['width'], px['height']);
         };
     }
