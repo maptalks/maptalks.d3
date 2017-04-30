@@ -313,6 +313,10 @@ D3Layer.registerRenderer('canvas', class extends maptalks.renderer.CanvasRendere
         this.completeRender();
     }
 
+    drawOnInteracting() {
+        this.draw();
+    }
+
     _armContext() {
         if (!this.context) {
             return;
