@@ -122,7 +122,7 @@ describe('D3Layer', function () {
     it('should show', function (done) {
         var layer = getCanvasD3Layer();
         layer.config('visible', false);
-        layer.once('layerload', function () {
+        layer.once('add', function () {
             expect(layer).not.to.be.painted();
             layer.once('layerload', function () {
                 expect(layer).to.be.painted();
