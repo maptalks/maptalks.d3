@@ -1,7 +1,10 @@
 /*!
- * maptalks.d3 v0.1.0
+ * maptalks.d3 v0.2.0
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
+ */
+/*!
+ * requires maptalks@^0.23.0 
  */
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('maptalks'), require('d3')) :
@@ -347,6 +350,10 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
         this.completeRender();
     };
 
+    _class2.prototype.drawOnInteracting = function drawOnInteracting() {
+        this.draw();
+    };
+
     _class2.prototype._armContext = function _armContext() {
         if (!this.context) {
             return;
@@ -378,5 +385,7 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
 exports.D3Layer = D3Layer;
 
 Object.defineProperty(exports, '__esModule', { value: true });
+
+typeof console !== 'undefined' && console.log('maptalks.d3 v0.2.0, requires maptalks@^0.23.0.');
 
 })));
