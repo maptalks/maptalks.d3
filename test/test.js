@@ -110,8 +110,10 @@ describe('D3Layer', function () {
         var layer = getCanvasD3Layer();
         layer.once('layerload', function () {
             map.on('zoomend', function () {
-                expect(layer).to.be.painted();
-                done();
+                map.on('frameend', function () {
+                    expect(layer).to.be.painted();
+                    done();
+                });
             });
             map.zoomIn();
         });
