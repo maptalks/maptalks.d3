@@ -69,7 +69,7 @@ export class D3Layer extends maptalks.Layer {
     redraw() {
         //request layer to refresh
         if (this.isCanvasRender()) {
-            this._getRenderer().requestMapToRender();
+            this._getRenderer().setToRedraw();
         }
         return this;
     }
@@ -96,6 +96,12 @@ D3Layer.registerRenderer('dom', class {
         return this.layer.getMap();
     }
 
+    needToRedraw() {
+        const map = this.getMap();
+        const renderer = map._getRenderer();
+        return map.isInteracting() || renderer && renderer.isStateChanged();
+    }
+
     render() {
         if (!this._predrawn) {
             this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
@@ -112,8 +118,18 @@ D3Layer.registerRenderer('dom', class {
             this.layer.draw.apply(this.layer, args);
             this._drawed = true;
         }
+        this._refreshViewBox();
         this.layer.fire('layerload');
         return true;
+    }
+
+    drawOnInteracting(e) {
+        const map = this.getMap();
+        if (map.isZooming() && this._layerContainer.style.display !== 'none' && e && e.matrix) {
+            maptalks.DomUtil.setTransformMatrix(this._layerContainer, e.matrix['container']);
+        } else if (!(map.isMoving() && !map.getPitch())) {
+            this._refreshViewBox();
+        }
     }
 
     setZIndex(z) {
@@ -125,20 +141,10 @@ D3Layer.registerRenderer('dom', class {
         return {
             'zoomend' : this.onZoomEnd,
             'zoomstart' : this.onZoomStart,
-            'moving' : this.onMoving,
-            'moveend' : this._refreshViewBox,
-            'resize'  : this._refreshViewBox,
-            'zooming' : this.onZooming,
-            'pitch' : this._refreshViewBox,
-            'rotate' : this._refreshViewBox
+            'moveend' : this._refreshViewBox
         };
     }
 
-    onMoving() {
-        if (this.getMap().getPitch()) {
-            this._refreshViewBox();
-        }
-    }
 
     onZoomEnd() {
         this._resetContainer();
@@ -153,11 +159,6 @@ D3Layer.registerRenderer('dom', class {
         }
     }
 
-    onZooming(param) {
-        if (this._layerContainer.style.display !== 'none') {
-            maptalks.DomUtil.setTransformMatrix(this._layerContainer, param.matrix['container']);
-        }
-    }
 
     getGeoProjection() {
         const map = this.getMap();
