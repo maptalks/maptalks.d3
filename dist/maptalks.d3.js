@@ -1,5 +1,5 @@
 /*!
- * maptalks.d3 v0.2.0
+ * maptalks.d3 v0.3.0
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -97,7 +97,7 @@ var D3Layer = function (_maptalks$Layer) {
     D3Layer.prototype.redraw = function redraw() {
         //request layer to refresh
         if (this.isCanvasRender()) {
-            this._getRenderer().requestMapToRender();
+            this._getRenderer().setToRedraw();
         }
         return this;
     };
@@ -127,6 +127,12 @@ D3Layer.registerRenderer('dom', function () {
         return this.layer.getMap();
     };
 
+    _class.prototype.needToRedraw = function needToRedraw() {
+        var map = this.getMap();
+        var renderer$$1 = map._getRenderer();
+        return map.isInteracting() || renderer$$1 && renderer$$1.isStateChanged();
+    };
+
     _class.prototype.render = function render() {
         if (!this._predrawn) {
             this._drawContext = this.layer.prepareToDraw(this.context, this.layer.getGeoProjection());
@@ -143,8 +149,18 @@ D3Layer.registerRenderer('dom', function () {
             this.layer.draw.apply(this.layer, args);
             this._drawed = true;
         }
+        this._refreshViewBox();
         this.layer.fire('layerload');
         return true;
+    };
+
+    _class.prototype.drawOnInteracting = function drawOnInteracting(e) {
+        var map = this.getMap();
+        if (map.isZooming() && this._layerContainer.style.display !== 'none' && e && e.matrix) {
+            maptalks.DomUtil.setTransformMatrix(this._layerContainer, e.matrix['container']);
+        } else if (!(map.isMoving() && !map.getPitch())) {
+            this._refreshViewBox();
+        }
     };
 
     _class.prototype.setZIndex = function setZIndex(z) {
@@ -156,19 +172,8 @@ D3Layer.registerRenderer('dom', function () {
         return {
             'zoomend': this.onZoomEnd,
             'zoomstart': this.onZoomStart,
-            'moving': this.onMoving,
-            'moveend': this._refreshViewBox,
-            'resize': this._refreshViewBox,
-            'zooming': this.onZooming,
-            'pitch': this._refreshViewBox,
-            'rotate': this._refreshViewBox
+            'moveend': this._refreshViewBox
         };
-    };
-
-    _class.prototype.onMoving = function onMoving() {
-        if (this.getMap().getPitch()) {
-            this._refreshViewBox();
-        }
     };
 
     _class.prototype.onZoomEnd = function onZoomEnd() {
@@ -181,12 +186,6 @@ D3Layer.registerRenderer('dom', function () {
     _class.prototype.onZoomStart = function onZoomStart() {
         if (this.layer.options['hideWhenZooming'] || !this._canTransform() || this.getMap().domCssMatrix) {
             this._layerContainer.style.display = 'none';
-        }
-    };
-
-    _class.prototype.onZooming = function onZooming(param) {
-        if (this._layerContainer.style.display !== 'none') {
-            maptalks.DomUtil.setTransformMatrix(this._layerContainer, param.matrix['container']);
         }
     };
 
@@ -386,6 +385,6 @@ exports.D3Layer = D3Layer;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.d3 v0.2.0, requires maptalks@^0.23.0.');
+typeof console !== 'undefined' && console.log('maptalks.d3 v0.3.0, requires maptalks@^0.23.0.');
 
 })));
