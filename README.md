@@ -45,7 +45,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## API Reference
 
-```D3Layer``` is a subclass of [maptalks.Layer](http://docs.maptalks.org/api/maptalks.Layer.html) and inherits all the methods of its parent.
+```D3Layer``` is a subclass of [maptalks.Layer](https://maptalks.github.io/docs/api/Layer.html) and inherits all the methods of its parent.
 
 ### `Constructor`
 
@@ -59,7 +59,7 @@ new maptalks.D3Layer(id, options)
     * renderer **String** renderer of the layer: 'dom' or 'canvas' ('canvas' by default)
     * hideWhenZooming **Boolean** for dom renderer, whether hide the layer when zooming to improve performance (false by default)
     * container **String** for dom renderer, specify the container for layer dom elements: 'front' or 'back' ('front' by default)
-    * Other options defined in [maptalks.Layer](http://docs.maptalks.org/api/maptalks.Layer.html)
+    * Other options defined in [maptalks.Layer](https://maptalks.github.io/docs/api/Layer.html)
 
 ### `config(key, value)`
 
