@@ -6,11 +6,8 @@
 /*!
  * requires maptalks@>=0.25.0 
  */
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('maptalks'), require('d3')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'maptalks', 'd3'], factory) :
-	(factory((global.maptalks = global.maptalks || {}),global.maptalks,global.d3));
-}(this, (function (exports,maptalks,d3) { 'use strict';
+import { Browser, Coordinate, DomUtil, Layer, Util, renderer } from 'maptalks';
+import { geoTransform } from 'd3';
 
 function _defaults(obj, defaults) { var keys = Object.getOwnPropertyNames(defaults); for (var i = 0; i < keys.length; i++) { var key = keys[i]; var value = Object.getOwnPropertyDescriptor(defaults, key); if (value && value.configurable && obj[key] === undefined) { Object.defineProperty(obj, key, value); } } return obj; }
 
@@ -20,7 +17,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : _defaults(subClass, superClass); }
 
-var TRANSFORM = maptalks.DomUtil['TRANSFORM'];
+var TRANSFORM = DomUtil['TRANSFORM'];
 
 function createContainer() {
     var ns = 'http://www.w3.org/2000/svg';
@@ -111,7 +108,7 @@ var D3Layer = function (_maptalks$Layer) {
     };
 
     return D3Layer;
-}(maptalks.Layer);
+}(Layer);
 
 D3Layer.mergeOptions(options);
 
@@ -157,7 +154,7 @@ D3Layer.registerRenderer('dom', function () {
     _class.prototype.drawOnInteracting = function drawOnInteracting(e) {
         var map = this.getMap();
         if (map.isZooming() && this._layerContainer.style.display !== 'none' && e && e.matrix) {
-            maptalks.DomUtil.setTransformMatrix(this._layerContainer, e.matrix['container']);
+            DomUtil.setTransformMatrix(this._layerContainer, e.matrix['container']);
         } else if (!(map.isMoving() && !map.getPitch())) {
             this._refreshViewBox();
         }
@@ -200,7 +197,7 @@ D3Layer.registerRenderer('dom', function () {
             if (x[0] && x[1]) {
                 x = [x[0], x[1]];
             }
-            var point = map.coordinateToPoint(new maptalks.Coordinate(x, y), me._d3zoom);
+            var point = map.coordinateToPoint(new Coordinate(x, y), me._d3zoom);
             if (this && this.stream) {
                 this.stream.point(point.x, point.y);
             }
@@ -209,7 +206,7 @@ D3Layer.registerRenderer('dom', function () {
         if (d3v === 3) {
             return proj;
         } else if (d3v === 4) {
-            return d3.geoTransform({
+            return geoTransform({
                 point: proj
             });
         }
@@ -218,7 +215,7 @@ D3Layer.registerRenderer('dom', function () {
 
     _class.prototype.remove = function remove() {
         delete this.context;
-        maptalks.DomUtil.removeDomNode(this._layerContainer);
+        DomUtil.removeDomNode(this._layerContainer);
         delete this._layerContainer;
         delete this._viewBox;
         delete this._d3zoom;
@@ -226,7 +223,7 @@ D3Layer.registerRenderer('dom', function () {
     };
 
     _class.prototype._canTransform = function _canTransform() {
-        return maptalks.Browser.any3d || maptalks.Browser.ie9;
+        return Browser.any3d || Browser.ie9;
     };
 
     _class.prototype._getContainerPos = function _getContainerPos() {
@@ -240,7 +237,7 @@ D3Layer.registerRenderer('dom', function () {
 
     _class.prototype._initContainer = function _initContainer() {
         var map = this.getMap();
-        this._layerContainer = maptalks.DomUtil.createElOn('div', 'position:absolute;left:0px;top:0px;');
+        this._layerContainer = DomUtil.createElOn('div', 'position:absolute;left:0px;top:0px;');
         this.context = createContainer();
         this._layerContainer.appendChild(this.context);
         this._resetContainer();
@@ -277,10 +274,10 @@ D3Layer.registerRenderer('dom', function () {
                 container.style.width = _size['width'] + 'px';
                 container.style.height = _size['height'] + 'px';
             }
-            var matrix = maptalks.Util.join(map.domCssMatrix);
+            var matrix = Util.join(map.domCssMatrix);
             container.style[TRANSFORM] = 'matrix3D(' + matrix + ')';
         } else {
-            maptalks.DomUtil.removeTransform(container);
+            DomUtil.removeTransform(container);
             if (container.style.width || container.style.height) {
                 container.style.width = null;
                 container.style.height = null;
@@ -314,7 +311,7 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
             if (x[0] && x[1]) {
                 x = [x[0], x[1]];
             }
-            var point = map.coordinateToContainerPoint(new maptalks.Coordinate(x, y));
+            var point = map.coordinateToContainerPoint(new Coordinate(x, y));
             if (this && this.stream) {
                 this.stream.point(point.x, point.y);
             }
@@ -324,7 +321,7 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
         if (d3v === 3) {
             return proj;
         } else if (d3v === 4) {
-            return d3.geoTransform({
+            return geoTransform({
                 point: proj
             });
         }
@@ -379,12 +376,8 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
     };
 
     return _class2;
-}(maptalks.renderer.CanvasRenderer));
+}(renderer.CanvasRenderer));
 
-exports.D3Layer = D3Layer;
-
-Object.defineProperty(exports, '__esModule', { value: true });
+export { D3Layer };
 
 typeof console !== 'undefined' && console.log('maptalks.d3 v0.4.0, requires maptalks@>=0.25.0.');
-
-})));
