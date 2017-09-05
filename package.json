@@ -43,7 +43,7 @@
   },
   "peerDependencies": {
     "d3": "^4.8.0",
-    "maptalks": "^0.25.0"
+    "maptalks": ">=0.25.0"
   },
   "dependencies": {}
 }
