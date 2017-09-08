@@ -1,6 +1,6 @@
 {
   "name": "maptalks.d3",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A maptalks Layer to render with great d3js library.",
   "license": "MIT",
   "repository": {
@@ -8,8 +8,8 @@
     "url": "https://github.com/maptalks/maptalks.d3.js.git"
   },
   "main": "dist/maptalks.d3.js",
-  "module" : "dist/maptalks.d3.es.js",
-  "jsnext:main" : "dist/maptalks.d3.es.js",
+  "module": "dist/maptalks.d3.es.js",
+  "jsnext:main": "dist/maptalks.d3.es.js",
   "scripts": {
     "preversion": "npm test",
     "version": "gulp minify && git add -A dist",

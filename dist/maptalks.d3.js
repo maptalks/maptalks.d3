@@ -1,5 +1,5 @@
 /*!
- * maptalks.d3 v0.4.0
+ * maptalks.d3 v0.4.1
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -385,6 +385,6 @@ exports.D3Layer = D3Layer;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.d3 v0.4.0, requires maptalks@>=0.25.0.');
+typeof console !== 'undefined' && console.log('maptalks.d3 v0.4.1, requires maptalks@>=0.25.0.');
 
 })));
