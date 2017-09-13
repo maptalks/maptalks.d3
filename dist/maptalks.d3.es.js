@@ -1,5 +1,5 @@
 /*!
- * maptalks.d3 v0.4.1
+ * maptalks.d3 v0.4.2
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -127,7 +127,8 @@ D3Layer.registerRenderer('dom', function () {
     _class.prototype.needToRedraw = function needToRedraw() {
         var map = this.getMap();
         var renderer$$1 = map._getRenderer();
-        return map.isInteracting() || renderer$$1 && renderer$$1.isStateChanged();
+        //isStateChanged is a unused method sine 0.26
+        return map.isInteracting() || renderer$$1 && (renderer$$1.isStateChanged && renderer$$1.isStateChanged() || renderer$$1.isViewChanged && renderer$$1.isViewChanged());
     };
 
     _class.prototype.render = function render() {
@@ -380,4 +381,4 @@ D3Layer.registerRenderer('canvas', function (_maptalks$renderer$Ca) {
 
 export { D3Layer };
 
-typeof console !== 'undefined' && console.log('maptalks.d3 v0.4.1, requires maptalks@>=0.25.0.');
+typeof console !== 'undefined' && console.log('maptalks.d3 v0.4.2, requires maptalks@>=0.25.0.');

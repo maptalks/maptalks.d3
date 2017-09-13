@@ -1,6 +1,6 @@
 {
   "name": "maptalks.d3",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A maptalks Layer to render with great d3js library.",
   "license": "MIT",
   "repository": {
