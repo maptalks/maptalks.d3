@@ -99,7 +99,8 @@ D3Layer.registerRenderer('dom', class {
     needToRedraw() {
         const map = this.getMap();
         const renderer = map._getRenderer();
-        return map.isInteracting() || renderer && renderer.isStateChanged();
+        //isStateChanged is a unused method sine 0.26
+        return map.isInteracting() || renderer && (renderer.isStateChanged && renderer.isStateChanged() || renderer.isViewChanged && renderer.isViewChanged());
     }
 
     render() {
