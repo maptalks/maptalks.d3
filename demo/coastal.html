@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <style>
 html,body{
     margin:0px;
@@ -26,7 +26,7 @@ html,body{
 <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
 <script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="../dist/maptalks.d3.js"></script>
 <script>
 
@@ -46,8 +46,8 @@ function mapInit() {
           'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
         },
         baseLayer : new maptalks.TileLayer("base",{
-          'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-          'subdomains'  : ['a','b','c','d','e']
+            'urlTemplate' : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png',
+            'subdomains'  : ['a','b','c','d']
         })
     });
     var d3Layer = new maptalks.D3Layer('d3', {'d3Version' : 3, 'renderer' : 'dom', 'hideWhenZooming' : false});

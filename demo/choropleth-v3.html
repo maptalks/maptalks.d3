@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Choropleth Map by D3Layer</title>
-<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
 <script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="../dist/maptalks.d3.js"></script>
 </head>
 <body>
@@ -27,8 +27,8 @@ var map = new maptalks.Map("map",{
       'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
   },
   baseLayer : new maptalks.TileLayer("base",{
-      'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-      'subdomains'  : ['a','b','c','d','e']
+      'urlTemplate' : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png',
+      'subdomains'  : ['a','b','c','d']
   })
 });
 
