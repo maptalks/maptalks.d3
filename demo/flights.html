@@ -72,7 +72,7 @@ function mapInit() {
           'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
         },
         baseLayer : new maptalks.TileLayer("base",{
-          'urlTemplate' : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png',
+          'urlTemplate' : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
           'subdomains'  : ['a','b','c','d']
         })
     });
